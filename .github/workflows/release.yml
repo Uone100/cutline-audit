@@ -1,0 +1,37 @@
+name: Test and publish Cutline Audit
+on:
+  push:
+    branches: [main]
+    paths: ['VERSION']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cutline-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the CLI regression suite
+        run: python3 -m unittest -v
+      - name: Package and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          tag="v$version"
+          asset="cutline-audit-$version.zip"
+          python3 package.py "$asset"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            expected="sha256:$(sha256sum "$asset" | cut -d' ' -f1)"
+            actual="$(gh release view "$tag" --json assets --jq ".assets[] | select(.name == \"$asset\") | .digest")"
+            [[ "$actual" == "$expected" ]]
+          else
+            gh release create "$tag" "$asset" --target "$GITHUB_SHA" --title "Cutline Audit $version" --notes "Unzip the attachment and follow the worked example in README.md."
+          fi

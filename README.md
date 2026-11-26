@@ -2,6 +2,10 @@
 
 Find where an exported subtitle track diverges from a recut timeline. Give it the original SRT, **actual kept source ranges in export order**, and the exported SRT. Each timing finding identifies the source subtitle, kept segment, exported subtitle and timing error in milliseconds. Runs locally with Python 3.9+ and its standard library.
 
+[Download v0.1.0 ZIP](https://github.com/Uone100/cutline-audit/releases/download/v0.1.0/cutline-audit-0.1.0.zip)
+
+Extract the ZIP and follow the worked example below with Python 3.9 or newer.
+
 ## Try a known failure
 
 Download the versioned ZIP under **Assets**, unzip it, and run from the extracted directory. [Latest release](https://github.com/Uone100/cutline-audit/releases/latest)
